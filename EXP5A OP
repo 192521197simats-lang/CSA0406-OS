@@ -1,0 +1,7 @@
+Parent Process: PID = 7897, PPID = 7886
+-------------------------------------------
+[Child 1] PID = 7898, PPID = 7897
+[Child 2] PID = 7899, PPID = 7897
+[Child 3] PID = 7900, PPID = 7897
+-------------------------------------------
+Parent process finished.
