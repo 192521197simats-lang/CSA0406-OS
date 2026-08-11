@@ -1,0 +1,145 @@
+NAME :LAKSHUMIPRIYA O S 
+192521197
+ASSESSMENT _CO2 AT3
+
+
+
+question  1
+
+P1 
+lock(R1)
+wait(100 ms)
+lock(R2)
+critical section
+unlock(R2)
+unlock(R1)
+
+P2
+lock(R2)
+wait(100 ms)
+lock(R1)
+critical section
+unlock(R1)
+unlock(R2)
+
+The four necessary deadlock conditions are present:
+
+Mutual exclusion – R1 and R2 can be locked by only one process.
+Hold and wait – Each process holds one resource while waiting for another.
+No preemption – A locked resource cannot be forcibly taken.
+Circular wait – P1 waits for P2 and P2 waits for P1.
+
+CORRECTED DEADLOCK IS 
+P1:
+lock(R1)
+wait(100 ms)
+lock(R2)
+critical section
+unlock(R2)
+unlock(R1)
+
+P2:
+lock(R1)
+wait(100 ms)
+lock(R2)
+critical section
+unlock(R2)
+unlock(R1)
+
+IF P1 HAS R1,P2 WAITS FOR R1 INSTEAD HOLDING R2,WAITING FOR R1.CIRCULAR WEIGHT IS LIMITED.
+MAY CAUSED DUE TO INCONSISTENT RESOURSE ACQUISATION ORDER.
+Optimization: Enforce a global lock ordering, such as always locking R1 before R2.
+
+QUESTION 2 
+
+CPU utilization = 30%, even though processes are ready.
+Ready → Waiting → Ready → Waiting → Ready
+
+the processes are frequently moving to the waiting statE
+A process normally enters the waiting state when it is waiting for something such as I/O, disk access, a lock, or another process.
+
+
+In this the processes are not spending enough time executing on the CPU. They are frequently waiting for I/O or other resources. Because of this, the CPU remains idle for a large amount of time.
+Optimization:
+* improve CPU utilization by reducing unnecessary waiting.
+ methods are:
+
+1.Use asynchronous I/O so that the CPU does not have to wait for I/O operations.
+2.Use buffering and caching to reduce slow I/O operations.
+3.Reduce unnecessary locking and synchronization between processes.
+
+For example, instead of waiting for an I/O operation to finish, the process can continue doing other work.
+
+Thus, reducing the waiting time will allow processes to use the CPU more and improve CPU utilization.
+
+QUESTION 3 
+GIVEN '
+Code = 5 MB
+Heap = 150 MB
+Stack = 1 MB per thread
+Number of threads = 25
+RAM = 2 GB
+
+Memory used by all thread stacks:
+25 × 1 MB = 25 MB
+
+Total memory shown is:
+5 + 150 + 25 = 180 MB
+
+The available RAM is 2 GB, so the given memory allocation alone is not greater than the physical RAM.
+However, the program is still getting frequent page faults. This can happen because many threads may be accessing different parts of the heap at the same time. This causes poor memory locality and increases the number of pages that need to be loaded.
+
+Optimizations:
+1. Reduce heap usagE Unused memory should be released and unnecessary memory allocation should be avoided. Data structures should also be made more memory efficient.
+2. Reduce the active memory used by threads
+We can reduce unnecessary threads and make threads access data in a more organized way.
+This improves memory locality and reduces page faults.
+Therefore, reducing memory usage and improving memory locality can improve the performance of the program.
+
+QUESTION 4 
+P5 is present in Q3, which is the lowest-priority queue.
+The queues are:Q1 → Highest priority
+Q2 → Medium priority
+Q3 → Lowest priority
+The scheduler always gives preference to Q1 over Q2 and Q3.
+
+If new processes keep entering Q1, the CPU will continuously execute Q1 processes. 
+Therefore, P5 in Q3 keeps waiting and may never get CPU time.
+This situation is called starvation.
+The fact that Q3 uses FCFS does not solve the problem because FCFS only decides the order of processes inside Q3. It does not give Q3 priority over Q1 or Q2.
+Optimization:
+We can use aging to solve starvation.
+
+THE EXAMPLE IS 
+P5 -----> waits for a long time
+Priority increases
+P5 moves to a higher priority queue
+P5 gets CPU time
+
+aging is an effective method to prevent starvation and provide fairness.
+
+QUESTION 5
+The server performs 20,000 context switches per second, which is very high.
+The average burst time of a thread is 2 ms, but the scheduler quantum is only 1 ms.
+This means a thread may be stopped after only 1 ms even though it normally needs around 2 ms to complete its CPU burst
+
+THE EX
+Thread runs  1 ms
+Quantum expires
+Context switch
+Another thread runs
+
+This happens repeatedly and increases the number of context switches.
+
+
+
+So both short time quantum and frequent I/O waiting cause many context switches.
+
+Optimizations:
+1. Increase the time quantum
+The quantum can be increased from 1 ms to around 2–4 ms depending on the system. This allows a thread to execute for a longer time before being switched.
+2. Reduce I/O waiting We can use buffering, asynchronous I/O and better I/O handling to reduce the number of times threads have to wait.
+
+ using a thread pool can reduce unnecessary thread creation and management.
+
+SO  increasing the time quantum and reducing unnecessary I/O waiting can reduce context-switch overhead.
