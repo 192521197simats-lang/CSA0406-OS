@@ -1,0 +1,278 @@
+Question1 
+#include <stdio.h>
+
+int main() {
+    int base, limit, logical, physical;
+
+    printf("Enter base register value: ");
+    scanf("%d", &base);
+
+    printf("Enter limit register value: ");
+    scanf("%d", &limit);
+
+    printf("Enter logical address: ");
+    scanf("%d", &logical);
+
+    if (logical >= 0 && logical < limit) {
+        physical = base + logical;
+
+        printf("\nAddress is VALID.\n");
+        printf("Logical Address  : %d\n", logical);
+        printf("Physical Address : %d\n", physical);
+    } else {
+        printf("\nAddress is INVALID.\n");
+        printf("Logical address is outside the limit.\n");
+    }
+
+    return 0;
+}
+
+
+Question 2
+#include <stdio.h>
+
+int main() {
+    int pages, frames, page_size;
+    int page_table[100];
+    int page, offset;
+    int frame, physical;
+
+    printf("Enter number of pages: ");
+    scanf("%d", &pages);
+
+    printf("Enter number of frames: ");
+    scanf("%d", &frames);
+
+    printf("Enter page size: ");
+    scanf("%d", &page_size);
+
+    printf("\nEnter page table entries:\n");
+
+    for (int i = 0; i < pages; i++) {
+        printf("Page %d -> Frame: ", i);
+        scanf("%d", &page_table[i]);
+    }
+
+    printf("\nEnter page number: ");
+    scanf("%d", &page);
+
+    printf("Enter offset: ");
+    scanf("%d", &offset);
+
+    if (page < 0 || page >= pages) {
+        printf("\nInvalid page number.\n");
+    }
+    else if (offset < 0 || offset >= page_size) {
+        printf("\nInvalid offset.\n");
+    }
+    else {
+        frame = page_table[page];
+
+        if (frame < 0 || frame >= frames) {
+            printf("\nPage is not currently mapped to a valid frame.\n");
+        }
+        else {
+            physical = frame * page_size + offset;
+
+            printf("\nPage Number     : %d\n", page);
+            printf("Offset          : %d\n", offset);
+            printf("Frame Number    : %d\n", frame);
+            printf("Physical Address: %d\n", physical);
+        }
+    }
+
+    return 0;
+}
+
+Question 3 
+#include <stdio.h>
+
+int main() {
+    int page_table[100];
+    int n, page, offset, page_size;
+    int frame, physical;
+
+    printf("Enter number of pages: ");
+    scanf("%d", &n);
+
+    printf("Enter page size: ");
+    scanf("%d", &page_size);
+
+    printf("\nEnter page table:\n");
+
+    for (int i = 0; i < n; i++) {
+        printf("Page %d -> Frame: ", i);
+        scanf("%d", &page_table[i]);
+    }
+
+    printf("\nPage Table:\n");
+    printf("-------------------\n");
+    printf("Page\tFrame\n");
+    printf("-------------------\n");
+
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\n", i, page_table[i]);
+    }
+
+    printf("\nEnter logical page number: ");
+    scanf("%d", &page);
+
+    printf("Enter offset: ");
+    scanf("%d", &offset);
+
+    if (page < 0 || page >= n) {
+        printf("\nInvalid page number.\n");
+        return 0;
+    }
+
+    if (offset < 0 || offset >= page_size) {
+        printf("\nInvalid offset.\n");
+        return 0;
+    }
+
+    frame = page_table[page];
+    physical = frame * page_size + offset;
+
+    printf("\nPage Number     : %d\n", page);
+    printf("Offset          : %d\n", offset);
+    printf("Mapped Frame    : %d\n", frame);
+    printf("Physical Address: %d\n", physical);
+
+    return 0;
+}
+
+Question4
+#include <stdio.h>
+
+int main() {
+    int pages, tlb_size;
+    int page_table[100];
+    int tlb_page[100], tlb_frame[100];
+    int page, frame;
+    int tlb_hit = 0;
+    int i;
+
+    float hit_ratio;
+    float tlb_time, memory_time;
+    float hit_time, miss_time, eat;
+
+    printf("Enter number of pages: ");
+    scanf("%d", &pages);
+
+    printf("\nEnter page table:\n");
+
+    for (i = 0; i < pages; i++) {
+        printf("Page %d -> Frame: ", i);
+        scanf("%d", &page_table[i]);
+    }
+
+    printf("\nEnter TLB size: ");
+    scanf("%d", &tlb_size);
+
+    printf("\nEnter TLB entries:\n");
+
+    for (i = 0; i < tlb_size; i++) {
+        printf("TLB Entry %d - Page: ", i);
+        scanf("%d", &tlb_page[i]);
+
+        printf("Frame: ");
+        scanf("%d", &tlb_frame[i]);
+    }
+
+    printf("\nEnter page number to access: ");
+    scanf("%d", &page);
+
+    /* Search TLB */
+    for (i = 0; i < tlb_size; i++) {
+        if (tlb_page[i] == page) {
+            tlb_hit = 1;
+            frame = tlb_frame[i];
+            break;
+        }
+    }
+
+    if (tlb_hit) {
+        printf("\nTLB HIT!\n");
+        printf("Page %d is mapped to Frame %d using TLB.\n",
+               page, frame);
+    }
+    else {
+        printf("\nTLB MISS!\n");
+
+        if (page >= 0 && page < pages) {
+            frame = page_table[page];
+
+            printf("Page table accessed.\n");
+            printf("Page %d is mapped to Frame %d.\n",
+                   page, frame);
+        }
+        else {
+            printf("Invalid page number.\n");
+            return 0;
+        }
+    }
+
+    /* Calculate Effective Access Time */
+
+    printf("\nEnter TLB access time (in ns): ");
+    scanf("%f", &tlb_time);
+
+    printf("Enter memory access time (in ns): ");
+    scanf("%f", &memory_time);
+
+    printf("Enter TLB hit ratio (0 to 1): ");
+    scanf("%f", &hit_ratio);
+
+    hit_time = tlb_time + memory_time;
+    miss_time = tlb_time + (2 * memory_time);
+
+    eat = hit_ratio * hit_time +
+          (1 - hit_ratio) * miss_time;
+
+    printf("\n----- TLB Performance -----\n");
+    printf("TLB Hit Time : %.2f ns\n", hit_time);
+    printf("TLB Miss Time: %.2f ns\n", miss_time);
+    printf("Effective Access Time: %.2f ns\n", eat);
+
+    return 0;
+}
+
+Question 5
+#include <stdio.h>
+
+int main() {
+    int base, limit;
+    int logical;
+    int physical;
+
+    printf("Enter base register: ");
+    scanf("%d", &base);
+
+    printf("Enter limit register: ");
+    scanf("%d", &limit);
+
+    printf("\nEnter logical address to access: ");
+    scanf("%d", &logical);
+
+    printf("\n----- Memory Protection Check -----\n");
+
+    if (logical < 0) {
+        printf("ACCESS DENIED!\n");
+        printf("Logical address cannot be negative.\n");
+    }
+    else if (logical >= limit) {
+        printf("ACCESS DENIED!\n");
+        printf("Address is outside the process address space.\n");
+    }
+    else {
+        physical = base + logical;
+
+        printf("ACCESS GRANTED!\n");
+        printf("Logical Address : %d\n", logical);
+        printf("Physical Address: %d\n", physical);
+    }
+
+    return 0;
+}
+
+
