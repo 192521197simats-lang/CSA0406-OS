@@ -1,0 +1,89 @@
+NAME: LAKHUMIPRIYA O S 
+REG NO:192521197
+
+
+question 1 
+BEGIN
+    SET threshold = 80
+    usage = GET_DISK_USAGE()
+    IF usage > threshold THEN
+        log_files = FIND_LOG_FILES()
+        SORT log_files BY size DESCENDING
+        FOR each file IN log_files DO
+            DELETE_OR_COMPRESS(file
+            usage = GET_DISK_USAGE()
+            IF usage <= threshold THEN
+                BREAK
+            ENDIF
+        ENDFOR
+    ENDIF
+    PRINT "Disk usage is under control"
+END
+
+
+QUESTION 2 
+BEGIN
+    INPUT process_list
+    SORT process_list BY priority DESCENDING
+    WHILE process_list IS NOT EMPTY DO
+        SELECT process WITH highest priority
+        ALLOCATE CPU TIME
+        EXECUTE process
+        IF process IS COMPLETED THEN
+            REMOVE process
+        ELSE
+            REDUCE priority slightly
+            ADD process BACK to process_list
+        ENDIF
+        SORT process_list BY priority DESCENDING
+    ENDWHILE
+END
+
+
+QUESTION 3 
+BEGIN
+    total_RAM = 16 GB
+    host_reserved = 4 GB
+    available_RAM = total_RAM - host_reserved
+    INPUT number_of_VMs
+    min_RAM = 2 GB
+    FOR i = 1 TO number_of_VMs DO
+        IF available_RAM >= min_RAM THEN
+            ALLOCATE min_RAM TO VM[i]
+            available_RAM = available_RAM - min_RAM
+        ELSE
+            PRINT "Insufficient memory for VM"
+        ENDIF
+    ENDFOR
+    PRINT "Remaining RAM =", available_RAM
+END
+
+
+QUESTION4 
+BEGIN
+
+    INPUT performance_required
+    INPUT budget
+    INPUT hardware_access
+    IF performance_required = HIGH AND hardware_access = TRUE THEN
+        selected_hypervisor = "Type 1"
+    ELSE IF budget = LOW THEN
+        selected_hypervisor = "Type 2"
+    ELSE
+        selected_hypervisor = "Type 1"
+    ENDIF
+    PRINT selected_hypervisor
+END
+
+
+QUESTIO 5 
+BEGIN
+    INPUT application_list
+    FOR each app IN application_list DO
+        CREATE cgroup for app
+        SET CPU limit for app
+        SET memory limit for app
+        ASSIGN app TO cgroup
+    ENDFOR
+    PRINT "Resource limits applied"
+END
