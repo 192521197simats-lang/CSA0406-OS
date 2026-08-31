@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Comparison function for sorting arrays in ascending order
+int compare(const void *a, const void *b) {
+    return (*(int *)a - *(int *)b);
+}
+
+int main() {
+    int queue[100], n, head, disk_size, total_head_movement = 0;
+    int left[100], right[100], l_count = 0, r_count = 0;
+    int current_position;
+
+    printf("--- C-SCAN Disk Scheduling Simulation ---\n");
+    
+    printf("Enter the total disk size (e.g., 200): ");
+    scanf("%d", &disk_size);
+    
+    printf("Enter the number of requests in the queue: ");
+    scanf("%d", &n);
+
+    printf("Enter the request queue (separated by spaces):\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &queue[i]);
+    }
+
+    printf("Enter the initial position of the disk head: ");
+    scanf("%d", &head);
+
+    // C-SCAN treats the boundaries as a continuous loop.
+    // We add both ends of the disk (0 and disk_size - 1) to handle the wrap-around.
+    left[l_count++] = 0;
+    right[r_count++] = disk_size - 1;
+
+    // Partition requests relative to the initial head position
+    for (int i = 0; i < n; i++) {
+        if (queue[i] < head) {
+            left[l_count++] = queue[i];
+        } else if (queue[i] > head) {
+            right[r_count++] = queue[i];
+        }
+    }
+
+    // Sort both sub-arrays in ascending order
+    qsort(left, l_count, sizeof(int), compare);
+    qsort(right, r_count, sizeof(int), compare);
+
+    printf("\n--- Disk Head Traversal Path ---\n");
+    printf("Initial Position: %d", head);
+
+    current_position = head;
+
+    // Phase 1: Move right towards the high end of the disk
+    for (int i = 0; i < r_count; i++) {
+        int movement = abs(right[i] - current_position);
+        total_head_movement += movement;
+        printf(" -> %d [Movement: %d]", right[i], movement);
+        current_position = right[i];
+    }
+
+    // Phase 2: Wrap around to the beginning of the disk (track 0)
+    // No requests are serviced during this jump, but head movement is counted
+    int wrap_movement = abs(0 - current_position);
+    total_head_movement += wrap_movement;
+    printf(" -> 0 [Wrap-Around Movement: %d]", wrap_movement);
+    current_position = 0;
+
+    // Phase 3: Resume moving right from track 0 to service remaining left elements
+    for (int i = 0; i < l_count; i++) {
+        // Skip track 0 if it was already printed as part of the wrap-around
+        if (left[i] == 0) continue; 
+        
+        int movement = abs(left[i] - current_position);
+        total_head_movement += movement;
+        printf(" -> %d [Movement: %d]", left[i], movement);
+        current_position = left[i];
+    }
+
+    printf("\n\nTotal Head Movement (Seek Time): %d tracks\n", total_head_movement);
+    printf("Average Seek Time: %.2f tracks\n", (float)total_head_movement / n);
+
+    return 0;
+}
