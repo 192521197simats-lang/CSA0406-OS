@@ -1,0 +1,45 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int queue[100], n, head, total_head_movement = 0;
+    int current_position;
+
+    printf("--- FCFS Disk Scheduling Simulation ---\n");
+    
+    printf("Enter the number of requests in the queue: ");
+    scanf("%d", &n);
+
+    if (n <= 0) {
+        printf("Error: Number of requests must be greater than 0.\n");
+        return 0;
+    }
+
+    printf("Enter the request queue (separated by spaces or enter):\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &queue[i]);
+    }
+
+    printf("Enter the initial position of the disk head: ");
+    scanf("%d", &head);
+
+    printf("\n--- Disk Head Traversal Path ---\n");
+    printf("Initial Position: %d", head);
+
+    current_position = head;
+    for (int i = 0; i < n; i++) {
+        // Calculate absolute head movement to the next request
+        int movement = abs(queue[i] - current_position);
+        total_head_movement += movement;
+        
+        printf(" -> %d [Movement: %d]", queue[i], movement);
+        
+        // Move the disk head to the current request position
+        current_position = queue[i];
+    }
+
+    printf("\n\nTotal Head Movement (Seek Time): %d tracks\n", total_head_movement);
+    printf("Average Seek Time: %.2f tracks\n", (float)total_head_movement / n);
+
+    return 0;
+}
