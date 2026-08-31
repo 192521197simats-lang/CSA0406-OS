@@ -1,0 +1,72 @@
+#include <stdio.h>
+#include <string.h>
+
+// Function to calculate the octal score of a 3-character permission block (e.g., "rwx")
+int calculateOctal(char r, char w, char x) {
+    int value = 0;
+    if (r == 'r') value += 4;
+    if (w == 'w') value += 2;
+    if (x == 'x') value += 1;
+    return value;
+}
+
+// Function to print descriptive text for a given user class permission block
+void printPermissions(char* userClass, char r, char w, char x) {
+    printf("  %-8s: [ ", userClass);
+    if (r == 'r') printf("Read "); else printf("-    ");
+    if (w == 'w') printf("Write "); else printf("-     ");
+    if (x == 'x') printf("Execute ]"); else printf("-       ]");
+    printf("\n");
+}
+
+int main() {
+    char permString[12];
+    
+    printf("--- Linux File Permissions Simulator & Decoder ---\n\n");
+    printf("Enter a 10-character Linux permission string (e.g., -rwxr-xr--):\n");
+    printf("👉 ");
+    scanf("%11s", permString);
+
+    // Validate the input string length
+    if (strlen(permString) != 10) {
+        printf("\n❌ Error: Invalid input! A valid Linux permission string must be exactly 10 characters long.\n");
+        return 1;
+    }
+
+    printf("\n================ Decoding Results ================\n");
+
+    // 1. Decode File Type (1st Character)
+    printf("File Type: ");
+    if (permString[0] == '-') {
+        printf("Regular File (-)\n");
+    } else if (permString[0] == 'd') {
+        printf("Directory (d)\n");
+    } else if (permString[0] == 'l') {
+        printf("Symbolic Link (l)\n");
+    } else {
+        printf("Unknown Type (%c)\n", permString[0]);
+    }
+
+    printf("--------------------------------------------------\n");
+    printf("Access Rights Breakdown:\n");
+
+    // 2. Decode Rights for Owner, Group, and Others
+    printPermissions("Owner",  permString[1], permString[2], permString[3]);
+    printPermissions("Group",  permString[4], permString[5], permString[6]);
+    printPermissions("Others", permString[7], permString[8], permString[9]);
+
+    // 3. Compute Octal Components
+    int ownerOctal  = calculateOctal(permString[1], permString[2], permString[3]);
+    int groupOctal  = calculateOctal(permString[4], permString[5], permString[6]);
+    int othersOctal = calculateOctal(permString[7], permString[8], permString[9]);
+
+    printf("--------------------------------------------------\n");
+    
+    // 4. Output the equivalent terminal commands
+    printf("Equivalent Octal Value : %d%d%d\n", ownerOctal, groupOctal, othersOctal);
+    printf("To apply this via Linux terminal, run:\n");
+    printf("💡 chmod %d%d%d filename\n", ownerOctal, groupOctal, othersOctal);
+    printf("==================================================\n");
+
+    return 0;
+}
