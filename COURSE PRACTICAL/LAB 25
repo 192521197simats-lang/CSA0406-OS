@@ -1,0 +1,102 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <dirent.h>
+
+int main()
+{
+    int fd;
+    char buffer[100];
+    struct stat fileStat;
+    DIR *dir;
+    struct dirent *entry;
+
+    /* 1. Create/Open a file using open() */
+    fd = open("sample.txt", O_CREAT | O_RDWR, 0644);
+
+    if (fd == -1)
+    {
+        perror("open");
+        exit(1);
+    }
+
+    printf("File opened successfully.\n");
+
+    /* Write data to the file */
+    write(fd, "Hello UNIX I/O System Calls\n", 28);
+
+    /* 2. fcntl() - Get file descriptor flags */
+    int flags = fcntl(fd, F_GETFL);
+
+    if (flags == -1)
+    {
+        perror("fcntl");
+    }
+    else
+    {
+        printf("fcntl(): File status flags = %d\n", flags);
+    }
+
+    /* 3. lseek() - Move file pointer */
+    off_t position = lseek(fd, 0, SEEK_SET);
+
+    if (position == -1)
+    {
+        perror("lseek");
+    }
+    else
+    {
+        printf("lseek(): File pointer moved to position %ld\n",
+               (long)position);
+    }
+
+    /* Read the file */
+    int n = read(fd, buffer, sizeof(buffer) - 1);
+
+    if (n > 0)
+    {
+        buffer[n] = '\0';
+        printf("File contents: %s", buffer);
+    }
+
+    /* 4. stat() - Get file information */
+    if (stat("sample.txt", &fileStat) == -1)
+    {
+        perror("stat");
+    }
+    else
+    {
+        printf("\nstat(): File information\n");
+        printf("File size       : %ld bytes\n",
+               (long)fileStat.st_size);
+        printf("File permissions : %o\n",
+               fileStat.st_mode & 0777);
+        printf("Number of links  : %ld\n",
+               (long)fileStat.st_nlink);
+    }
+
+    close(fd);
+
+    /* 5. opendir() - Open current directory */
+    dir = opendir(".");
+
+    if (dir == NULL)
+    {
+        perror("opendir");
+        exit(1);
+    }
+
+    printf("\nDirectory contents:\n");
+
+    /* 6. readdir() - Read directory entries */
+    while ((entry = readdir(dir)) != NULL)
+    {
+        printf("%s\n", entry->d_name);
+    }
+
+    closedir(dir);
+
+    return 0;
+}
