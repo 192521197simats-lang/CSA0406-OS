@@ -1,0 +1,96 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Comparison function for sorting arrays in ascending order
+int compare(const void *a, const void *b) {
+    return (*(int *)a - *(int *)b);
+}
+
+int main() {
+    int queue[100], n, head, disk_size, total_head_movement = 0;
+    int left[100], right[100], l_count = 0, r_count = 0;
+    int direction; // 0 for left (toward 0), 1 for right (toward disk_size - 1)
+
+    printf("--- SCAN Disk Scheduling Simulation ---\n");
+    
+    printf("Enter the total disk size (e.g., 200): ");
+    scanf("%d", &disk_size);
+    
+    printf("Enter the number of requests in the queue: ");
+    scanf("%d", &n);
+
+    printf("Enter the request queue (separated by spaces):\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &queue[i]);
+    }
+
+    printf("Enter the initial position of the disk head: ");
+    scanf("%d", &head);
+
+    printf("Enter direction (0 for Left/Toward 0, 1 for Right/Toward %d): ", disk_size - 1);
+    scanf("%d", &direction);
+
+    // Separate requests into left and right sub-arrays relative to the head position
+    // If direction is left, we include the boundary track 0
+    // If direction is right, we include the boundary track (disk_size - 1)
+    if (direction == 0) {
+        left[l_count++] = 0; 
+    } else {
+        right[r_count++] = disk_size - 1;
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (queue[i] < head) {
+            left[l_count++] = queue[i];
+        } else if (queue[i] > head) {
+            right[r_count++] = queue[i];
+        }
+    }
+
+    // Sort both sub-arrays to maintain sequential scanning order
+    qsort(left, l_count, sizeof(int), compare);
+    qsort(right, r_count, sizeof(int), compare);
+
+    printf("\n--- Disk Head Traversal Path ---\n");
+    printf("Initial Position: %d", head);
+
+    int current_position = head;
+
+    // Execute scanning based on chosen direction
+    if (direction == 0) {
+        // Move Left: Process left items in descending order (closest to head first)
+        for (int i = l_count - 1; i >= 0; i--) {
+            int movement = abs(left[i] - current_position);
+            total_head_movement += movement;
+            printf(" -> %d [Movement: %d]", left[i], movement);
+            current_position = left[i];
+        }
+        // Reverse Direction and Move Right: Process right items in ascending order
+        for (int i = 0; i < r_count; i++) {
+            int movement = abs(right[i] - current_position);
+            total_head_movement += movement;
+            printf(" -> %d [Movement: %d]", right[i], movement);
+            current_position = right[i];
+        }
+    } else {
+        // Move Right: Process right items in ascending order (closest to head first)
+        for (int i = 0; i < r_count; i++) {
+            int movement = abs(right[i] - current_position);
+            total_head_movement += movement;
+            printf(" -> %d [Movement: %d]", right[i], movement);
+            current_position = right[i];
+        }
+        // Reverse Direction and Move Left: Process left items in descending order
+        for (int i = l_count - 1; i >= 0; i--) {
+            int movement = abs(left[i] - current_position);
+            total_head_movement += movement;
+            printf(" -> %d [Movement: %d]", left[i], movement);
+            current_position = left[i];
+        }
+    }
+
+    printf("\n\nTotal Head Movement (Seek Time): %d tracks\n", total_head_movement);
+    printf("Average Seek Time: %.2f tracks\n", (float)total_head_movement / n);
+
+    return 0;
+}
