@@ -1,0 +1,157 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#define TOTAL_BLOCKS 100
+#define MAX_FILES 10
+
+// Structure representing the directory entry for each file
+struct File {
+    char name[30];
+    int start_block;
+    int end_block;
+    int length;
+};
+
+int main() {
+    // disk[i] stores the index of the next block. 
+    // -1 represents the End-Of-File (EOF). -2 represents a free block.
+    int disk[TOTAL_BLOCKS];
+    struct File files[MAX_FILES];
+    int file_count = 0;
+    int choice;
+
+    // Initialize all disk blocks as free (-2)
+    for (int i = 0; i < TOTAL_BLOCKS; i++) {
+        disk[i] = -2; 
+    }
+
+    // Seed the random number generator to scatter blocks randomly across disk
+    srand(time(NULL));
+
+    while (1) {
+        printf("\n--- Linked File Allocation Simulation ---\n");
+        printf("1. Create File (Linked Allocation)\n");
+        printf("2. Display File Traversal (Follow Pointers)\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        if (choice == 1) {
+            if (file_count >= MAX_FILES) {
+                printf("Error: Maximum file allocation limit reached!\n");
+                continue;
+            }
+
+            char name[30];
+            int len;
+
+            printf("Enter file name: ");
+            scanf("%s", name);
+            printf("Enter number of blocks required: ");
+            scanf("%d", &len);
+
+            if (len <= 0) {
+                printf("Error: File length must be greater than 0.\n");
+                continue;
+            }
+
+            // Count total available free blocks on disk
+            int free_blocks = 0;
+            for (int i = 0; i < TOTAL_BLOCKS; i++) {
+                if (disk[i] == -2) {
+                    free_blocks++;
+                }
+            }
+
+            if (free_blocks < len) {
+                printf("Error: Not enough free space! Only %d blocks available.\n", free_blocks);
+                continue;
+            }
+
+            int prev_block = -1;
+            int start_block = -1;
+            int blocks_allocated = 0;
+
+            // Dynamically allocate blocks randomly across the disk space
+            while (blocks_allocated < len) {
+                int random_block = rand() % TOTAL_BLOCKS;
+
+                // Check if the randomly selected block is free
+                if (disk[random_block] == -2) {
+                    if (blocks_allocated == 0) {
+                        // Mark the first block of the file
+                        start_block = random_block;
+                    } else {
+                        // Point the previous block to this newly allocated block
+                        disk[prev_block] = random_block;
+                    }
+                    
+                    // Temporarily mark current block as the end of list (-1)
+                    disk[random_block] = -1; 
+                    prev_block = random_block;
+                    blocks_allocated++;
+                }
+            }
+
+            // Save file details into directory structure
+            strcpy(files[file_count].name, name);
+            files[file_count].start_block = start_block;
+            files[file_count].end_block = prev_block;
+            files[file_count].length = len;
+            file_count++;
+
+            printf("Success: File '%s' allocated successfully.\n", name);
+            printf("Directory Records -> Start Block: %d | End Block: %d | Length: %d\n", start_block, prev_block, len);
+
+        } else if (choice == 2) {
+            if (file_count == 0) {
+                printf("No files allocated yet.\n");
+                continue;
+            }
+
+            char search_name[30];
+            int found = -1;
+
+            printf("Enter file name to traverse: ");
+            scanf("%s", search_name);
+
+            for (int i = 0; i < file_count; i++) {
+                if (strcmp(files[i].name, search_name) == 0) {
+                    found = i;
+                    break;
+                }
+            }
+
+            if (found == -1) {
+                printf("Error: File not found.\n");
+            } else {
+                printf("\n--- Traversal Map for File '%s' ---\n", files[found].name);
+                printf("Directory entries: [Start: %d, End: %d]\n", files[found].start_block, files[found].end_block);
+                printf("Traversing scattered blocks:\n");
+
+                int current = files[found].start_block;
+                int block_index = 1;
+
+                while (current != -1) {
+                    printf("  Step %d: Accessing Block %d ", block_index++, current);
+                    if (disk[current] != -1) {
+                        printf("--(points to next block)--> %d\n", disk[current]);
+                    } else {
+                        printf("--(points to)--> NULL (EOF)\n");
+                    }
+                    current = disk[current]; // Move pointer to next linked block
+                }
+            }
+
+        } else if (choice == 3) {
+            printf("Exiting simulation.\n");
+            break;
+        } else {
+            printf("Invalid choice. Please select options 1, 2, or 3.\n");
+        }
+    }
+
+    return 0;
+}
