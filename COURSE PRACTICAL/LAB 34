@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <string.h>
+
+struct File {
+    char name[20];
+    int start_block;
+    int length;
+};
+
+int main() {
+    int total_blocks = 50;
+    int disk[50];
+    struct File files[10];
+    int file_count = 0;
+    int choice;
+
+    // Initialize all disk blocks to empty (0 means free, 1 means allocated)
+    for (int i = 0; i < total_blocks; i++) {
+        disk[i] = 0;
+    }
+
+    while (1) {
+        printf("\n--- Sequential File Allocation Menu ---\n");
+        printf("1. Create/Allocate File\n");
+        printf("2. Access Record (Sequential Read)\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        if (choice == 1) {
+            char name[20];
+            int start, len, can_allocate = 1;
+
+            printf("Enter file name: ");
+            scanf("%s", name);
+            printf("Enter starting block index: ");
+            scanf("%d", &start);
+            printf("Enter file length (number of blocks/records): ");
+            scanf("%d", &len);
+
+            // Bounds check
+            if (start + len > total_blocks) {
+                printf("Error: File exceeds total disk size!\n");
+                continue;
+            }
+
+            // Check if contiguous blocks are available
+            for (int i = start; i < start + len; i++) {
+                if (disk[i] == 1) {
+                    can_allocate = 0;
+                    break;
+                }
+            }
+
+            if (can_allocate) {
+                for (int i = start; i < start + len; i++) {
+                    disk[i] = 1;
+                }
+                strcpy(files[file_count].name, name);
+                files[file_count].start_block = start;
+                files[file_count].length = len;
+                file_count++;
+                printf("File allocated successfully physical blocks %d to %d.\n", start, start + len - 1);
+            } else {
+                printf("Error: Block overlap! Contiguous space not available.\n");
+            }
+
+        } else if (choice == 2) {
+            char search_name[20];
+            int record_index;
+            int found = -1;
+
+            printf("Enter file name to access: ");
+            scanf("%s", search_name);
+
+            for (int i = 0; i < file_count; i++) {
+                if (strcmp(files[i].name, search_name) == 0) {
+                    found = i;
+                    break;
+                }
+            }
+
+            if (found == -1) {
+                printf("Error: File not found.\n");
+            } else {
+                printf("File found. Length is %d records.\n", files[found].length);
+                printf("Enter target record offset to read (0 to %d): ", files[found].length - 1);
+                scanf("%d", &record_index);
+
+                if (record_index < 0 || record_index >= files[found].length) {
+                    printf("Error: Invalid record index.\n");
+                } else {
+                    // Simulate sequential access traversal
+                    printf("Simulating Sequential Access:\n");
+                    int absolute_start = files[found].start_block;
+                    
+                    for (int r = 0; r <= record_index; r++) {
+                        printf(" -> Reading record %d at disk block %d\n", r, absolute_start + r);
+                    }
+                    printf("Success: Target record index %d reached and accessed successfully!\n", record_index);
+                }
+            }
+        } else if (choice == 3) {
+            break;
+        } else {
+            printf("Invalid choice. Try again.\n");
+        }
+    }
+
+    return 0;
+}
