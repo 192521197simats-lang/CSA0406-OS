@@ -1,0 +1,28 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
+
+int main() {
+    char dirPath[100];
+    struct dirent *de;  // Pointer for directory entry
+
+    printf("Enter directory path (enter '.' for current directory): ");
+    scanf("%s", dirPath);
+
+    // opendir() returns a pointer of DIR type
+    DIR *dr = opendir(dirPath);
+
+    if (dr == NULL) {
+        printf("Could not open directory '%s'. Please check if path exists.\n", dirPath);
+        return 1;
+    }
+
+    printf("\n--- Contents of '%s' ---\n", dirPath);
+    // readdir() returns NULL when end of directory stream is reached
+    while ((de = readdir(dr)) != NULL) {
+        printf("%s\n", de->d_name);
+    }
+
+    closedir(dr);
+    return 0;
+}
