@@ -1,0 +1,51 @@
+#include <stdio.h>
+
+int main() {
+    int incomingStream[] = {4, 1, 2, 4, 5};
+    int pageFaults = 0;
+    int frames = 3;
+    int m, n, s, pages;
+
+    pages = sizeof(incomingStream) / sizeof(incomingStream[0]);
+
+    printf("Incoming \t Frame 1 \t Frame 2 \t Frame 3\n");
+
+    int temp[frames];
+    for (m = 0; m < frames; m++) {
+        temp[m] = -1;
+    }
+
+    for (m = 0; m < pages; m++) {
+        s = 0;
+
+        // Check if page already exists in frames
+        for (n = 0; n < frames; n++) {
+            if (temp[n] == incomingStream[m]) {
+                s++;
+                pageFaults--;
+            }
+        }
+
+        pageFaults++;
+
+        // If page is not in frames, replace oldest page (FIFO)
+        if ((s == 0) && (pageFaults <= frames)) {
+            temp[pageFaults - 1] = incomingStream[m];
+        } else if (s == 0) {
+            temp[(pageFaults - 1) % frames] = incomingStream[m];
+        }
+
+        // Print current state of frames
+        printf("%\t\t", incomingStream[m]);
+        for (n = 0; n < frames; n++) {
+            if (temp[n] != -1)
+                printf(" %d\t\t", temp[n]);
+            else
+                printf(" -\t\t");
+        }
+        printf("\n");
+    }
+
+    printf("\nTotal Page Faults: %d\n", pageFaults);
+    return 0;
+}
