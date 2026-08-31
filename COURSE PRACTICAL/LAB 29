@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 5
+
+int buffer[BUFFER_SIZE];
+int in = 0;
+int out = 0;
+
+sem_t empty; // Counts empty buffer slots
+sem_t full;  // Counts filled buffer slots
+pthread_mutex_t mutex; // Controls critical section access
+
+void* producer(void* pno) {
+    int item;
+    for (int i = 0; i < 5; i++) {
+        item = rand() % 100; // Generate a random item
+
+        sem_wait(&empty);              // Decrement empty count
+        pthread_mutex_lock(&mutex);    // Enter critical section
+
+        buffer[in] = item;
+        printf("Producer %d: Inserted Item %d at buffer index %d\n", *((int*)pno), item, in);
+        in = (in + 1) % BUFFER_SIZE;
+
+        pthread_mutex_unlock(&mutex);  // Exit critical section
+        sem_post(&full);               // Increment full count
+
+        sleep(1);
+    }
+    return NULL;
+}
+
+void* consumer(void* cno) {
+    for (int i = 0; i < 5; i++) {
+        sem_wait(&full);               // Decrement full count
+        pthread_mutex_lock(&mutex);    // Enter critical section
+
+        int item = buffer[out];
+        printf("Consumer %d: Removed Item %d from buffer index %d\n", *((int*)cno), item, out);
+        out = (out + 1) % BUFFER_SIZE;
+
+        pthread_mutex_unlock(&mutex);  // Exit critical section
+        sem_post(&empty);              // Increment empty count
+
+        sleep(1);
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t prod[2], cons[2];
+    pthread_mutex_init(&mutex, NULL);
+    sem_init(&empty, 0, BUFFER_SIZE);
+    sem_init(&full, 0, 0);
+
+    int a[2] = {1, 2}; // Producer/Consumer IDs
+
+    // Create producer and consumer threads
+    for (int i = 0; i < 2; i++) {
+        pthread_create(&prod[i], NULL, producer, (void*)&a[i]);
+        pthread_create(&cons[i], NULL, consumer, (void*)&a[i]);
+    }
+
+    // Wait for threads to finish execution
+    for (int i = 0; i < 2; i++) {
+        pthread_join(prod[i], NULL);
+        pthread_join(cons[i], NULL);
+    }
+
+    // Clean up
+    pthread_mutex_destroy(&mutex);
+    sem_destroy(&empty);
+    sem_destroy(&full);
+
+    return 0;
+}
